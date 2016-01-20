@@ -39,4 +39,4 @@ Usage
       -V, --version            output the version number
       -p, --path [value]       output path
       -d, --delimeter [value]  delimeter between filename and lang
-
+      -t, --transpose          transpose input csv file
