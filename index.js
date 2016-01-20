@@ -8,6 +8,7 @@ program
   .usage('[options] <file ...>')
   .option('-p, --path [value]', 'output path, default: out', 'out')
   .option('-d, --delimeter [value]', 'delimeter between filename and lang', '.')
+  .option('-t, --transpose', 'transpose input csv file')
   .parse(process.argv);
 
 var file = program.args[0];
@@ -29,6 +30,10 @@ fs.readFile(file, function (err, content) {
   }
 
   parse(content, function (err, trans) {
+    if (program.transpose) {
+      trans = require("lodash-transpose").transpose(trans);
+    }
+
     var o_langs = trans.shift();
     o_langs.shift();
 
