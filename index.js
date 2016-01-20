@@ -6,7 +6,7 @@ var program = require('commander');
 program
   .version('0.0.1')
   .usage('[options] <file ...>')
-  .option('-p, --path [value]', 'output path', 'out')
+  .option('-p, --path [value]', 'output path, default: out', 'out')
   .option('-d, --delimeter [value]', 'delimeter between filename and lang', '.')
   .parse(process.argv);
 
