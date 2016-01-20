@@ -5,7 +5,7 @@
   "main": "index.js",
   "bin": {
     "i18ncsv2json": "index.js"
-  }
+  },
   "dependencies": {
     "commander": "^2.9.0",
     "csv-parse": "^1.0.1",
