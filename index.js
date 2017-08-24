@@ -4,83 +4,118 @@ var program = require('commander');
 
 
 program
-  .version('0.0.1')
-  .usage('[options] <file ...>')
-  .option('-p, --path [value]', 'output path, default: out', 'out')
-  .option('-d, --delimeter [value]', 'delimeter between filename and lang', '.')
-  .option('-t, --transpose', 'transpose input csv file')
-  .parse(process.argv);
+    .version('0.0.1')
+    .usage('[options] <paths ...>')
+    .option('-p, --path [value]', 'output path, default: out', 'out')
+    .option('-d, --delimeter [value]', 'delimeter between filename and lang', '.')
+    .option('-e, --extension [value]', 'extension of files to take in account when specifying a directory path')
+    .option('-f, --fieldDelimiter [value]', 'delimiter between fields', ',')
+    .option('-m, --merge ', 'merge all csv files into a single json file')
+    .option('-t, --transpose', 'transpose input csv file')
+    .parse(process.argv);
 
-var file = program.args[0];
-
-if (!file) {
-   console.error('no csv file is given!');
-   process.exit(1);
+if (program.args.length === 0) {
+    console.error('No path provided as argument!');
+    process.exit(1);
 }
 
-var title = file.split('.').slice(0, -1).join('.');
 
 var fs = require('fs');
 var parse = require('csv-parse');
+var path = require('path');
+var objectPath = require('object-path');
 
-fs.readFile(file, function (err, content) {
-  if (err) {
-     console.error('file is not readable!');
-     process.exit(1);
-  }
+let previousLangData = {};
 
-  parse(content, function (err, trans) {
-    if (program.transpose) {
-      trans = require("lodash-transpose").transpose(trans);
+const parseOptions = { 'delimiter': program.fieldDelimiter || ',' };
+
+program.args.forEach((argPath) => {
+    let pathFiles;
+    try {
+        pathFiles = fs.readdirSync(argPath)
+            .filter((fileName) => !program.extension || new RegExp(program.extension + '$').test(fileName))
+            .map((fileName) => path.join(argPath, fileName));
+    } catch (err) {
+        pathFiles = [argPath];
     }
-
-    var o_langs = trans.shift();
-    o_langs.shift();
-
-    var langs = o_langs.slice();
-    var lang = '';
-
-    var buffer = {};
-
-    while (lang = langs.shift()) {
-      lang = lang.toLowerCase();
-      buffer[lang] = {};
+    if (pathFiles.length === 0) {
+        console.error('No file in path: ', argPath);
+        process.exit(1);
     }
+    pathFiles.forEach((file) => {
+        let content;
+        try {
+            content = fs.readFileSync(file);
 
-    var entry = [];
-    var key = '';
+        } catch (err) {
+            console.error('File ' + file + ' is not readable!');
+            process.exit(1);
+        }
+        parse(content, parseOptions, (err, trans) => {
+            if (program.transpose) {
+                trans = require("lodash-transpose").transpose(trans);
+            }
 
-    var objectPath = require('object-path');
+            var o_langs = trans.shift();
+            o_langs.shift();
 
-    while (entry = trans.shift()) {
-      key = entry.shift();
+            var langs = o_langs.slice();
+            var lang = '';
 
-      langs = o_langs.slice();
-      while (v = entry.shift(), lang = langs.shift()) {
-        lang = lang.toLowerCase();
-        objectPath.set(buffer[lang], key, v);
-      }
-    }
+            var buffer = {};
 
-    var path = require('path')
-    var p = path.join(program.path);
+            while (lang = langs.shift()) {
+                lang = lang.toLowerCase();
+                buffer[lang] = {};
+            }
 
-    require('mkdirp')(p);
+            var entry = [];
+            var key = '';
 
-    var target_file = '';
-    var target = '';
+            while (entry = trans.shift()) {
+                key = entry.shift();
 
-    langs = o_langs.slice();
-    while (lang = langs.shift()) {
-      lang = lang.toLowerCase();
-      target = [title, lang].join(program.delimeter);
-      target = [target, 'json'].join('.');
+                langs = o_langs.slice();
+                while (v = entry.shift(), lang = langs.shift()) {
+                    lang = lang.toLowerCase();
+                    objectPath.set(buffer[lang], key, v);
+                }
+            }
 
-      target_file = path.join(p, target);
+            var p = path.join(program.path);
 
-      console.log(target_file)
-      fs.writeFile(target_file, JSON.stringify(buffer[lang], null, 2));
-    }
+            require('mkdirp')(p);
 
-  });
+            var target_file = '';
+            var target = '';
+
+            langs = o_langs.slice();
+            while (lang = langs.shift()) {
+                lang = lang.toLowerCase();
+                if (program.merge) {
+                    target = lang;
+                } else {
+                    var title = file.split('.').slice(0, -1).join('.');
+                    target = [title, lang].join(program.delimeter);
+                }
+                target = [target, 'json'].join('.');
+
+                target_file = path.join(p, path.basename(target));
+
+                let currentFileLang = buffer[lang];
+                if (program.merge) {
+                    try {
+                        if (!previousLangData[lang]) {
+                            console.log(target_file)
+                        }
+                        currentFileLang = Object.assign(previousLangData[lang] || {}, currentFileLang);
+                        previousLangData[lang] = currentFileLang;
+                    } catch (err) { /* Do nothing  */ }
+                } else {
+                    console.log(target_file)
+                }
+                fs.writeFileSync(target_file, JSON.stringify(currentFileLang, null, 2));
+            }
+        });
+    });
 });
