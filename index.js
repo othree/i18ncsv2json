@@ -12,6 +12,8 @@ program
     .option('-f, --fieldDelimiter [value]', 'delimiter between fields', ',')
     .option('-m, --merge ', 'merge all csv files into a single json file')
     .option('-t, --transpose', 'transpose input csv file')
+    .option('-r, --readEncoding [value]', 'encoding to use to read files')
+    .option('-w, --writeEncoding [value]', 'encoding to use to write files')
     .parse(process.argv);
 
 if (program.args.length === 0) {
@@ -29,6 +31,9 @@ let previousLangData = {};
 
 const parseOptions = { 'delimiter': program.fieldDelimiter || ',' };
 
+const readOptions = (program.readEncoding ? { 'encoding': program.readEncoding } : null);
+const writeOptions = (program.writeEncoding ? { 'encoding': program.writeEncoding } : null);
+
 program.args.forEach((argPath) => {
     let pathFiles;
     try {
@@ -45,10 +50,10 @@ program.args.forEach((argPath) => {
     pathFiles.forEach((file) => {
         let content;
         try {
-            content = fs.readFileSync(file);
+            content = fs.readFileSync(file, readOptions);
 
         } catch (err) {
-            console.error('File ' + file + ' is not readable!');
+            console.error('File ' + file + ' is not readable!', err);
             process.exit(1);
         }
         parse(content, parseOptions, (err, trans) => {
@@ -114,7 +119,7 @@ program.args.forEach((argPath) => {
                 } else {
                     console.log(target_file)
                 }
-                fs.writeFileSync(target_file, JSON.stringify(currentFileLang, null, 2));
+                fs.writeFileSync(target_file, JSON.stringify(currentFileLang, null, 2), writeOptions);
             }
         });
     });
