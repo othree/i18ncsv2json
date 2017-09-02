@@ -21,11 +21,9 @@ if (program.args.length === 0) {
   process.exit(1);
 }
 
-
 var fs = require('fs');
 var parse = require('csv-parse');
 var path = require('path');
-var objectPath = require('object-path');
 var merge = require('lodash.merge');
 
 let previousLangData = {};
@@ -84,7 +82,16 @@ program.args.forEach((argPath) => {
         langs = o_langs.slice();
         while (v = entry.shift(), lang = langs.shift()) {
           lang = lang.toLowerCase();
-          objectPath.set(buffer[lang], key, v);
+          if (key) {
+            let result = v;
+            key.split('.')
+              .reverse()
+              .forEach((property) => {
+                result = {
+                  [property]: result };
+              });
+            merge(buffer[lang], result);
+          }
         }
       }
 
