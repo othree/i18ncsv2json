@@ -28,6 +28,14 @@ And one is `tools.de.json`:
       "home": "Startseite"
     }
 
+### Field delimiter
+ 
+ If you are working with English locale, the field delimiter in csv files is the `,` character. But for other locales (e.g. french) the `;` character is used. You can adapt the csv field delimiter with the `fieldDelimiter` option.
+
+ Example command to use semicolon:
+
+     i18ncsv2json directory -f ";"
+
 Usage
 -----
 
@@ -40,3 +48,4 @@ Usage
       -p, --path [value]       output path
       -d, --delimeter [value]  delimeter between filename and lang
       -t, --transpose          transpose input csv file
+      -f, --fieldDelimiter [value]  delimiter between fields
