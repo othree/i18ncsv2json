@@ -9,6 +9,8 @@ program
   .option('-p, --path [value]', 'output path, default: out', 'out')
   .option('-d, --delimeter [value]', 'delimeter between filename and lang', '.')
   .option('-t, --transpose', 'transpose input csv file')
+  .option('-r, --readEncoding [value]', 'encoding to use to read files')
+  .option('-w, --writeEncoding [value]', 'encoding to use to write files')
   .parse(process.argv);
 
 var file = program.args[0];
@@ -23,7 +25,10 @@ var title = file.split('.').slice(0, -1).join('.');
 var fs = require('fs');
 var parse = require('csv-parse');
 
-fs.readFile(file, function (err, content) {
+const readOptions = (program.readEncoding ? { 'encoding': program.readEncoding } : null);
+const writeOptions = (program.writeEncoding ? { 'encoding': program.writeEncoding } : null);
+
+fs.readFile(file, readOptions, function (err, content) {
   if (err) {
      console.error('file is not readable!');
      process.exit(1);
@@ -79,7 +84,7 @@ fs.readFile(file, function (err, content) {
       target_file = path.join(p, target);
 
       console.log(target_file)
-      fs.writeFile(target_file, JSON.stringify(buffer[lang], null, 2));
+      fs.writeFile(target_file, JSON.stringify(buffer[lang], null, 2), writeOptions);
     }
 
   });
