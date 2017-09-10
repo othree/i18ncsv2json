@@ -28,6 +28,14 @@ And one is `tools.de.json`:
       "home": "Startseite"
     }
 
+### Field delimiter
+ 
+ If you are working with English locale, the field delimiter in csv files is the `,` character. But for other locales (e.g. french) the `;` character is used. You can adapt the csv field delimiter with the `fieldDelimiter` option.
+
+ Example command to use semicolon:
+
+     i18ncsv2json directory -f ";"
+
 ### Encoding
  
  It is possible to choose the encodings (for source csv files and output json files). This can typically be usefull when managing the csv files via excel which by default saves the file in windows specific encoding and not utf-8. Default output encoding is utf8.
@@ -36,7 +44,6 @@ And one is `tools.de.json`:
  
      i18ncsv2json directory -r latin1 -w utf16
  
-
 Usage
 -----
 
@@ -49,5 +56,6 @@ Usage
       -p, --path [value]       output path
       -d, --delimeter [value]  delimeter between filename and lang
       -t, --transpose          transpose input csv file
+      -f, --fieldDelimiter [value]  delimiter between fields
       -r, --readEncoding [value]    encoding to use to read files
       -w, --writeEncoding [value]   encoding to use to write files

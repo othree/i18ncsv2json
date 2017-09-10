@@ -9,6 +9,7 @@ program
   .option('-p, --path [value]', 'output path, default: out', 'out')
   .option('-d, --delimeter [value]', 'delimeter between filename and lang', '.')
   .option('-t, --transpose', 'transpose input csv file')
+  .option('-f, --fieldDelimiter [value]', 'delimiter between fields', ',')
   .option('-r, --readEncoding [value]', 'encoding to use to read files')
   .option('-w, --writeEncoding [value]', 'encoding to use to write files')
   .parse(process.argv);
@@ -34,7 +35,9 @@ fs.readFile(file, readOptions, function (err, content) {
      process.exit(1);
   }
 
-  parse(content, function (err, trans) {
+  const parseOptions = { 'delimiter': program.fieldDelimiter || ',' };
+
+  parse(content, parseOptions, function (err, trans) {
     if (program.transpose) {
       trans = require("lodash-transpose").transpose(trans);
     }
