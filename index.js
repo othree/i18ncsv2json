@@ -9,6 +9,7 @@ program
   .option('-p, --path [value]', 'output path, default: out', 'out')
   .option('-d, --delimeter [value]', 'delimeter between filename and lang', '.')
   .option('-t, --transpose', 'transpose input csv file')
+  .option('-f, --fieldDelimiter [value]', 'delimiter between fields', ',')
   .parse(process.argv);
 
 var file = program.args[0];
@@ -23,13 +24,15 @@ var title = file.split('.').slice(0, -1).join('.');
 var fs = require('fs');
 var parse = require('csv-parse');
 
+const parseOptions = { 'delimiter': program.fieldDelimiter || ',' };
+
 fs.readFile(file, function (err, content) {
   if (err) {
      console.error('file is not readable!');
      process.exit(1);
   }
 
-  parse(content, function (err, trans) {
+  parse(content, parseOptions, function (err, trans) {
     if (program.transpose) {
       trans = require("lodash-transpose").transpose(trans);
     }
