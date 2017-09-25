@@ -38,12 +38,16 @@ require('mkdirp')(p);
 
 program.args.forEach((arg) => {
   glob(arg, (err, files) => {
+    if (err) {
+      console.error('Error when reading path ' + arg + ' !', err);
+      process.exit(1);
+    }
     files.forEach((file) => {
       let content;
       try {
         content = fs.readFileSync(file, readOptions);
-      } catch (err) {
-        console.error('File ' + file + ' is not readable!', err);
+      } catch (error) {
+        console.error('File ' + file + ' is not readable!', error);
         process.exit(1);
       }
 
