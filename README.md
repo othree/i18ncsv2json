@@ -77,7 +77,8 @@ Usage
 
     i18ncsv2json [options] <files  ...>
 
-Options:  
+Options: 
+
 |Short flag|Flag                      |Description                                                             |
 |----------|--------------------------|------------------------------------------------------------------------|
 |-h        |--help                    |output usage information                                                |
